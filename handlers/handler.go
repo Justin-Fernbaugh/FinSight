@@ -1,19 +1,20 @@
-package handler
+package handlers
 
 import (
+	"log"
 	"strconv"
 	"strings"
-	"log"
 	"time"
 
 	"github.com/brunomvsouza/ynab.go"
-	ynabTransaction "github.com/brunomvsouza/ynab.go/api/transaction"
 	ynabAPI "github.com/brunomvsouza/ynab.go/api"
+	ynabTransaction "github.com/brunomvsouza/ynab.go/api/transaction"
 )
 
 const (
 	daysBack = 7
 	budgetIdentifier = "Justin"
+	tgUserID = 7053360498
 )
 
 func NewHandler(ynabClient ynab.ClientServicer) error {
@@ -26,8 +27,12 @@ func NewHandler(ynabClient ynab.ClientServicer) error {
 	for _, transaction := range transactions {
 		unstructuredTransactions += createUnstructuredTransaction(transaction)
 	}
-	log.Printf("Unstructured transactions: %s", unstructuredTransactions)
-
+	msg := Message{
+		UserID: tgUserID,
+		Msg: unstructuredTransactions,
+	}
+	SendMessagesAndShutdown([]Message{msg})
+	
 	return nil
 }
 

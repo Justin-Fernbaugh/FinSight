@@ -4,6 +4,7 @@ go 1.22.3
 
 require (
 	github.com/brunomvsouza/ynab.go v1.4.0
+	github.com/go-telegram/bot v1.12.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
