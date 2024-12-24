@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/brunomvsouza/ynab.go"
 	"github.com/Justin-Fernbaugh/FinSight/handler"
 )
 
@@ -49,7 +50,9 @@ func init() {
 func run(cmd *cobra.Command, args []string) {
 	log.Println("Starting FinSight ...")
 
-	if err := handler.NewHandler(token); err != nil {
+	ynabClient := ynab.NewClient(token)
+
+	if err := handler.NewHandler(ynabClient); err != nil {
 		log.Fatalf("Error creating handler: %v", err)
 	}
 }
