@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
+	"cloud.google.com/go/vertexai/genai"
+	llm "github.com/Justin-Fernbaugh/FinSight/pkg"
 	"github.com/brunomvsouza/ynab.go"
 	ynabAPI "github.com/brunomvsouza/ynab.go/api"
 	ynabTransaction "github.com/brunomvsouza/ynab.go/api/transaction"
@@ -17,7 +20,7 @@ const (
 	tgUserID = 7053360498
 )
 
-func NewHandler(ynabClient ynab.ClientServicer) error {
+func NewHandler(ynabClient ynab.ClientServicer, gemini *genai.GenerativeModel) error {
 	transactions, err := retrieveTransactions(ynabClient)
 	if err != nil {
 		log.Fatalf("Error retrieving transactions: %v", err)
@@ -27,9 +30,16 @@ func NewHandler(ynabClient ynab.ClientServicer) error {
 	for _, transaction := range transactions {
 		unstructuredTransactions += createUnstructuredTransaction(transaction)
 	}
+
+	summary, err := llm.GenerateResponse(context.Background(), gemini, unstructuredTransactions)
+	if err != nil {
+		log.Fatalf("Error generating response: %v", err)
+	}
+
+	log.Printf("Response: %s", summary)
 	msg := Message{
 		UserID: tgUserID,
-		Msg: unstructuredTransactions,
+		Msg: summary,
 	}
 	SendMessagesAndShutdown([]Message{msg})
 	

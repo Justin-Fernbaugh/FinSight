@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Justin-Fernbaugh/FinSight/handlers"
+	llm "github.com/Justin-Fernbaugh/FinSight/pkg"
 	"github.com/brunomvsouza/ynab.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,6 +20,9 @@ var (
 		Use: serviceName,
 		Run: run,
 	}
+	projectID string
+	location string
+	modelName string
 	ynabClientID string
 	ynabToken string
 	tgBotToken string
@@ -26,6 +30,9 @@ var (
 )
 
 func init() {
+		command.Flags().StringVar(&projectID, "project-id", "", "The GCP project ID")
+		command.Flags().StringVar(&location, "location", "us-west1", "The GCP location")
+		command.Flags().StringVar(&modelName, "model-name", "gemini-1.5-flash-001", "The LLM model name")
 		command.Flags().StringVar(&ynabClientID, "ynab-client-id", "", "The YNAB application client ID (required)")
 		command.Flags().StringVar(&ynabToken, "ynab-token", "", "The YNAB client secret (required)")
 		command.Flags().StringVar(&databaseName, "database-name", "", "The GCP Firestore database name (required)")
@@ -38,14 +45,8 @@ func init() {
 				log.Fatalf("Error marking flag %s as required: %v", flag, err)
 			}
 		}
-	
-		// Bind flags to viper
 		viper.BindPFlags(command.Flags())
-	
-		// Automatically read from environment variables
 		viper.AutomaticEnv()
-	
-		// Replace dashes in flags with underscores for environment variable mapping
 		viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 }
 
@@ -57,8 +58,13 @@ func run(cmd *cobra.Command, args []string) {
 		log.Fatalf("Error creating bot handler: %v", err)
 	}
 
+	gemini, err := llm.Handler(projectID, location, modelName)
+	if err != nil {
+		log.Fatalf("Error creating LLM handler: %v", err)
+	}
+
 	ynabClient := ynab.NewClient(ynabToken)
-	if err := handlers.NewHandler(ynabClient); err != nil {
+	if err := handlers.NewHandler(ynabClient, gemini); err != nil {
 		log.Fatalf("Error creating handler: %v", err)
 	}
 
