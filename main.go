@@ -30,16 +30,16 @@ var (
 )
 
 func init() {
-		command.Flags().StringVar(&projectID, "project-id", "", "The GCP project ID")
-		command.Flags().StringVar(&location, "location", "us-west1", "The GCP location")
-		command.Flags().StringVar(&modelName, "model-name", "gemini-1.5-flash-001", "The LLM model name")
+		command.Flags().StringVar(&projectID, "project-id", "", "The GCP project ID (required)")
 		command.Flags().StringVar(&ynabClientID, "ynab-client-id", "", "The YNAB application client ID (required)")
 		command.Flags().StringVar(&ynabToken, "ynab-token", "", "The YNAB client secret (required)")
 		command.Flags().StringVar(&databaseName, "database-name", "", "The GCP Firestore database name (required)")
 		command.Flags().StringVar(&tgBotToken, "tg-bot-token", "", "The Telegram bot token (required)")
+		command.Flags().StringVar(&location, "location", "us-west1", "The GCP location")
+		command.Flags().StringVar(&modelName, "model-name", "gemini-1.5-flash-001", "The LLM model name")
 
 		// Mark the flags as required
-		for _, flag := range []string{"ynab-client-id", "ynab-token", "tg-bot-token", "database-name"} {
+		for _, flag := range []string{"ynab-token", "tg-bot-token", "project-id"} {
 			err := command.MarkFlagRequired(flag)
 			if err != nil {
 				log.Fatalf("Error marking flag %s as required: %v", flag, err)
