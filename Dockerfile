@@ -5,7 +5,7 @@ FROM alpine:latest
 WORKDIR /root/
 
 # Copy the pre-built binary from the local directory to the container
-COPY finsight .
+COPY finsight-notifier .
 
 # Entry point
-ENTRYPOINT ["./finsight"]
+ENTRYPOINT ["./finsight-notifier"]
