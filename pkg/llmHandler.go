@@ -7,18 +7,17 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 )
 
-const (
-	systemPrompt = `You are a expert at crafting financial summarizations from transactions. 
-	Given a list of transactions create a neatly organized summary of the transactions by category with emojis and a total amount for each category.
-	Include the type of purchase and the vendor name in the summary which is from the last 7 days.`
-)
-
 var (
+	systemPrompt string
 	temperature float32 = 0.9
 	tokenLimit int32 = 1000
 )
 
-func Handler(projectID string, location string, modelName string) (*genai.GenerativeModel, error) {
+func Handler(projectID string, location string, modelName string, daysBack int) (*genai.GenerativeModel, error) {
+	systemPrompt = fmt.Sprintf(`You are a expert at crafting financial summarizations from transactions.
+	Given a list of transactions create a neatly organized summary of the transactions by category with emojis and a total amount for each category.
+	Include the type of purchase and the vendor name in the summary which is from the last %d days.`, daysBack)
+
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, projectID, location)
 	if err != nil {

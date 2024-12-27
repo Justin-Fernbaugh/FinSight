@@ -26,6 +26,8 @@ var (
 	ynabClientID string
 	ynabToken string
 	tgBotToken string
+	tgUserID int64
+	daysBack int
 	databaseName string
 )
 
@@ -35,11 +37,13 @@ func init() {
 		command.Flags().StringVar(&ynabToken, "ynab-token", "", "The YNAB client secret (required)")
 		command.Flags().StringVar(&databaseName, "database-name", "", "The GCP Firestore database name (required)")
 		command.Flags().StringVar(&tgBotToken, "tg-bot-token", "", "The Telegram bot token (required)")
+		command.Flags().Int64Var(&tgUserID, "tg-user-id", 0, "The Telegram user ID to send the msg (required)")
 		command.Flags().StringVar(&location, "location", "us-west1", "The GCP location")
+		command.Flags().IntVar(&daysBack, "days-back", 7, "The number of days back to retrieve transactions")
 		command.Flags().StringVar(&modelName, "model-name", "gemini-1.5-flash-001", "The LLM model name")
 
 		// Mark the flags as required
-		for _, flag := range []string{"ynab-token", "tg-bot-token", "project-id"} {
+		for _, flag := range []string{"ynab-token", "tg-bot-token", "tg-user-id", "project-id"} {
 			err := command.MarkFlagRequired(flag)
 			if err != nil {
 				log.Fatalf("Error marking flag %s as required: %v", flag, err)
@@ -58,13 +62,13 @@ func run(cmd *cobra.Command, args []string) {
 		log.Fatalf("Error creating bot handler: %v", err)
 	}
 
-	gemini, err := llm.Handler(projectID, location, modelName)
+	gemini, err := llm.Handler(projectID, location, modelName, daysBack)
 	if err != nil {
 		log.Fatalf("Error creating LLM handler: %v", err)
 	}
 
 	ynabClient := ynab.NewClient(ynabToken)
-	if err := handlers.NewHandler(ynabClient, gemini); err != nil {
+	if err := handlers.NewHandler(ynabClient, gemini, tgUserID, daysBack); err != nil {
 		log.Fatalf("Error creating handler: %v", err)
 	}
 
