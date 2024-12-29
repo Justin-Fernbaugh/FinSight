@@ -49,7 +49,7 @@ docker build -t finsight:latest .
 
 To run the Docker container:
 ```Dockerfile
-docker run -p 8080:8080 \
+docker run \
   -e PROJECT_ID="your_project_id" \
   -e LOCATION="us-west1" \
   -e MODEL_NAME="gemini-1.5-flash-001" \
